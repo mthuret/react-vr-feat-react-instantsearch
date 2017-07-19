@@ -8,7 +8,7 @@ import {
   View,
   NativeModules,
 } from 'react-vr';
-import { InstantSearch } from 'react-instantsearch/native';
+import { InstantSearch, Configure } from 'react-instantsearch/native';
 import {
   connectHits,
   connectSearchBox,
@@ -16,13 +16,15 @@ import {
   connectMenu,
   connectRefinementList,
 } from 'react-instantsearch/connectors';
+import Button from './components/Button';
+
 const RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
 
 export default class TrialReactVr extends React.Component {
   constructor() {
     super();
     this.state = {
-      query: '',
+      query: 'Paris',
       minGuest: 1,
       maxGuest: 6,
       roomType: [],
@@ -35,8 +37,7 @@ export default class TrialReactVr extends React.Component {
   }
 
   render() {
-    console.log('this.state', this.state);
-    const hits = this.state.query ? <Hits /> : null;
+    //const hits = this.state.query ? <Hits /> : null;
     return (
       <View>
         <InstantSearch
@@ -50,8 +51,16 @@ export default class TrialReactVr extends React.Component {
                 ? `${this.state.query.toLowerCase()}.jpg`
                 : 'default.jpg'
             )}
+            style={{
+              transform: [
+                {
+                  translate: [0, -10, 20],
+                },
+              ],
+            }}
           />
-          {hits}
+          <Hits />
+          <Configure hitsPerPage={5} />
           <SearchBox defaultRefinement={this.state.query} />
           <RefinementList
             defaultRefinement={this.state.roomType}
@@ -82,24 +91,28 @@ export default class TrialReactVr extends React.Component {
 }
 
 const Hits = connectHits(({ hits }) => {
-  const toto = hits.map(hit =>
-    <Text
+  const buttons = hits.map(hit => {
+    return (
+      <Button
+        key={hit.objectID}
+        onClick={() => {
+          this.props.onClick(hit.key);
+        }}
+        src={hit.picture_url}
+        {...hit}
+      />
+    );
+  });
+  return (
+    <View
       style={{
-        backgroundColor: 'blue',
-        padding: 0.02,
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        fontSize: 0.8,
-        layoutOrigin: [0.5, 0.5],
-        transform: [{ translate: [0, 0, -3] }],
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        transform: [{ rotateX: -5 }, { translate: [-2, 0.7, -3] }],
+        width: 5,
       }}
     >
-      {hit.name}
-    </Text>
-  );
-  return (
-    <View>
-      {toto}
+      {buttons}
     </View>
   );
 });
