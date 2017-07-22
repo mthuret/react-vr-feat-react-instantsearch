@@ -13,7 +13,7 @@ import { isNumber } from 'lodash';
 function init(bundle, parent, options) {
   const annyang = new Annyang();
 
-  const vr = new VRInstance(bundle, 'TrialReactVr', parent, {
+  const vr = new VRInstance(bundle, 'ReactVrFeatReactInstantSearch', parent, {
     // Add custom options here
     cursorVisibility: 'visible',
     nativeModules: [annyang],
@@ -30,9 +30,6 @@ function init(bundle, parent, options) {
 }
 
 export default class Annyang extends Module {
-  _rnctx: ReactNativeContext;
-  recognition: Object;
-
   constructor() {
     super('Annyang');
 
@@ -63,7 +60,11 @@ export default class Annyang extends Module {
           },
         ]);
       },
-      'For a price between :minPrice and :maxPrice': (minPrice, maxPrice) => {
+      '*tag price between :minPrice and :maxPrice': (
+        tag,
+        minPrice,
+        maxPrice
+      ) => {
         this._rnctx.callFunction('RCTDeviceEventEmitter', 'emit', [
           'myWorkerEvent',
           {
@@ -95,8 +96,17 @@ export default class Annyang extends Module {
           },
         ]);
       },
+      'Show :order results': order => {
+        this._rnctx.callFunction('RCTDeviceEventEmitter', 'emit', [
+          'myWorkerEvent',
+          {
+            pagination: order === 'next' ? 'next' : 'previous',
+          },
+        ]);
+      },
     };
     annyang.debug(true);
+    //annyang.setLanguage('FR_fr');
     // Add our commands to annyang
     annyang.addCommands(commands);
 
@@ -104,47 +114,9 @@ export default class Annyang extends Module {
     annyang.start();
   }
 
-  setNativeContext(rnctx: ReactNativeContext) {
+  setNativeContext(rnctx) {
     // Context
     this._rnctx = rnctx;
-  }
-
-  $start(resolve, reject) {
-    this.startListening();
-
-    // Get the speech recognition from annyang
-    this.recognition = annyang.getSpeechRecognizer();
-
-    var thisRef = this;
-
-    // Override method onresult
-    this.recognition.onresult = function(event) {
-      // Get the speech result
-      var SpeechResults = event.results[event.resultIndex];
-
-      if (thisRef._rnctx !== 'undefined')
-        thisRef._rnctx.invokeCallback(resolve, [SpeechResults[0].transcript]);
-    };
-  }
-
-  startListening() {
-    // Stop annyang if its listening
-    if (annyang.isListening) {
-      stop();
-    }
-
-    // Start again
-    console.log('Start');
-    annyang.start();
-  }
-
-  stop() {
-    annyang.abort();
-    console.log('Stop');
-  }
-
-  addCommands(commands) {
-    annyang.addCommands(commands);
   }
 }
 

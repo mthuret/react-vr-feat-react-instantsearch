@@ -1,5 +1,5 @@
 {
-  "name": "TrialReactVr",
+  "name": "react-vr-feat-react-instantsearch",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -9,7 +9,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "annyang": "^2.6.0",
     "lodash": "^4.17.4",
     "ovrui": "~1.0.0",
     "react": "~15.4.1",
